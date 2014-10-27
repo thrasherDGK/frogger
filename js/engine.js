@@ -6,9 +6,9 @@ var Engine = (function(global) {
         patterns = {},
         lastTime;
 
-    canvas.width = 505;
-    canvas.height = 606;
-    doc.body.appendChild(canvas);
+    canvas.width = 909;
+    canvas.height = 707;
+    $('#game-field').append(canvas);
 
     function main() {
         var now = Date.now(),
@@ -34,10 +34,10 @@ var Engine = (function(global) {
     }
 
     function updateEntities(dt) {
-        allEnemies.forEach(function(enemy) {
+       /* allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+        player.update(); */
     }
 
     function render() {
@@ -46,11 +46,12 @@ var Engine = (function(global) {
                 'images/stone-block.png',
                 'images/stone-block.png',
                 'images/stone-block.png',
+                'images/stone-block.png',
                 'images/grass-block.png',
                 'images/grass-block.png'
             ],
-            numRows = 6,
-            numCols = 5,
+            numRows = 7,
+            numCols = 9,
             row, col;
 
         for (row = 0; row < numRows; row++) {
@@ -63,10 +64,10 @@ var Engine = (function(global) {
     }
 
     function renderEntities() {
-        allEnemies.forEach(function(enemy) {
+       /* allEnemies.forEach(function(enemy) {
             enemy.render();
         });
-        player.render();
+        player.render(); */
     }
 
     function reset() {
