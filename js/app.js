@@ -4,13 +4,18 @@ var Enemy = function() {
   // we've provided one for you to get started
   this.direction = this.setDirection();
   this.speed = this.setSpeed();
+  this.sprite = this.setSprite(this.direction, this.speed);
   this.x = this.setStartX(this.direction);
   this.y = this.setStartY(this.direction);
   
   // The image/sprite for our enemies, this uses
   // a helper we've provided to easily load images
-  this.sprite = 'images/enemy-bug.png';
+  //this.sprite = 'images/enemy-bug.png';
 }
+
+Enemy.prototype.speedValues = [20, 40, 80, 160, 320];
+Enemy.prototype.ordinateValues = [65, 140, 225, 310];
+Enemy.prototype.spriteValues = [['images/char-boy.png', 'images/char-cat-girl.png'], ['images/char-horn-girl.png', 'images/char-pink-girl.png']];
 
 // Set Enemy moving direction
 // 1 - from left to right
@@ -20,13 +25,16 @@ Enemy.prototype.setDirection = function() {
   return direction === 0 ? 1 : -1;
 }
 
-Enemy.prototype.speedValues = [20, 40, 80, 160, 320];
-Enemy.prototype.ordinateValues = [[55, 65], [140, 150], [225, 235], [310, 320]];
-
 // Set Enemy moving speed to one of 5 levels multiple of 10
 Enemy.prototype.setSpeed = function() {
   var speed = this.speedValues[Math.floor(Math.random() * 5)];
   return speed;
+}
+
+Enemy.prototype.setSprite = function(direction, speed) {
+  var sprite = direction === 1 ? this.spriteValues[0] : this.spriteValues[1];
+  sprite = speed > 80 ? sprite[0] : sprite[1];
+  return sprite;
 }
 
 // Set Enemy starting position depending on their direction
@@ -35,8 +43,8 @@ Enemy.prototype.setStartX = function(direction) {
   return x;
 }
 
-Enemy.prototype.setStartY = function(direction) {
-  var y = direction === 1 ? this.ordinateValues[Math.floor(Math.random() * 4)][0] : this.ordinateValues[Math.floor(Math.random() * 4)][1];
+Enemy.prototype.setStartY = function() {
+  var y = this.ordinateValues[Math.floor(Math.random() * 4)];
   return y;
 }
 
