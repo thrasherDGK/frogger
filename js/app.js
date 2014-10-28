@@ -1,72 +1,48 @@
-// Enemies our player must avoid
 var Enemy = function() {
-  // Variables applied to each of our instances go here,
-  // we've provided one for you to get started
   this.direction = this.setDirection();
   this.speed = this.setSpeed();
   this.sprite = this.setSprite(this.direction, this.speed);
   this.x = this.setEnemyX(this.direction);
   this.y = this.setEnemyY(this.direction);
-  
-  // The image/sprite for our enemies, this uses
-  // a helper we've provided to easily load images
-  // this.sprite = 'images/enemy-bug.png';
 }
 
 Enemy.prototype.speedValues = [20, 40, 80, 160, 320];
 Enemy.prototype.ordinateValues = [60, 143, 227, 310];
 Enemy.prototype.spriteValues = [['images/char-boy.png', 'images/char-cat-girl.png'], ['images/char-horn-girl.png', 'images/char-pink-girl.png']];
 
-// Set Enemy moving direction
-// 1 - from left to right
-// -1 - from right to left
 Enemy.prototype.setDirection = function() {
   var direction = Math.floor(Math.random() * 2);
   return direction === 0 ? 1 : -1;
 }
-
-// Set Enemy moving speed to one of 5 levels multiple of 10
 Enemy.prototype.setSpeed = function() {
   var speed = this.speedValues[Math.floor(Math.random() * 5)];
   return speed;
 }
-
 Enemy.prototype.setSprite = function(direction, speed) {
   var sprite = direction === 1 ? this.spriteValues[0] : this.spriteValues[1];
   sprite = speed > 80 ? sprite[0] : sprite[1];
   return sprite;
 }
-
-// Set Enemy starting position depending on their direction
 Enemy.prototype.setEnemyX = function(direction) {
   var x = direction === 1 ? -(Math.floor(Math.random() * 200)) : (Math.floor(Math.random() * 200)) + 909;
   return x;
 }
-
 Enemy.prototype.setEnemyY = function() {
   var y = this.ordinateValues[Math.floor(Math.random() * 4)];
   return y;
 }
-
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
 Enemy.prototype.update = function(dt) {
   this.x += this.direction * this.speed * dt;
 }
-
-// Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
-
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
 
 var Player = function() {
   this.x = this.setPlayerX();
   this.y = this.setPlayerY();
   this.sprite = 'images/char-boy.png';
+  this.hp = new HealthPoints();
 }
 
 Player.prototype.setPlayerX = function() {
@@ -77,9 +53,10 @@ Player.prototype.setPlayerY = function() {
   var y = 393;
   return y;
 }
-
-Player.prototype.update = function(dt) {
-
+Player.prototype.update = function(dt) {}
+Player.prototype.resetPosition = function() {
+  this.x = this.setPlayerX();
+  this.y = this.setPlayerY();  
 }
 Player.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -100,6 +77,31 @@ Player.prototype.handleInput = function(move) {
       break;
   }
 }
+Player.prototype.die = function() {
+  this.hp.loose(1);
+  this.resetPosition();  
+}
+
+var HealthPoints = function() {
+  this.value = 5;
+  this.sprite = 'images/small-heart.png';
+}
+HealthPoints.prototype.loose = function(num) {
+  this.value -= num;
+}
+HealthPoints.prototype.gain = function(num) {
+  this.value += num;
+}
+HealthPoints.prototype.render = function() {
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, 200, 40);
+  for (var x = 0, i = 0; i < this.value; i++)
+  {
+    ctx.drawImage(Resources.get(this.sprite), x, 0);
+    x += 30;
+  }
+}
+HealthPoints.prototype.update = function() {}
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
@@ -114,6 +116,11 @@ var player = new Player();
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
+window.addEventListener("keydown", function(e) {
+    if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+        e.preventDefault();
+    }
+}, false);
 document.addEventListener('keyup', function(e) {
     var allowedKeys = {
         37: 'left',
