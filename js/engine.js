@@ -33,7 +33,8 @@ var Engine = (function(global) {
   }
 
   function updateEntities(dt) {
-    allEnemies.forEach(function(enemy) {
+    level.update(dt);
+    level.enemies.forEach(function(enemy) {
       enemy.update(dt);
     });
     player.update(dt);
@@ -41,7 +42,7 @@ var Engine = (function(global) {
   }
 
   function checkCollisions() {
-    allEnemies.forEach(function(enemy) {
+    level.enemies.forEach(function(enemy) {
       if(Math.abs(enemy.x - player.x) <= 65 && Math.abs(enemy.y - player.y) <= 10) {
         player.die();
         console.log('player position: ' + player.x + ' player hp: ' + player.hp.value);
@@ -73,7 +74,7 @@ var Engine = (function(global) {
   }
 
   function renderEntities() {
-    allEnemies.forEach(function(enemy) {
+    level.enemies.forEach(function(enemy) {
       enemy.render();
     });
     player.render();

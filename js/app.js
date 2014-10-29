@@ -117,11 +117,50 @@ HealthPoints.prototype.update = function(dt) {
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
 
-var allEnemies = []
-for (var enemy, i = 0; i < 20; i++) {
-  enemy = new Enemy();
-  allEnemies.push(enemy);
+var Level = function() {
+  this.length = 30000;
+  this.difficulty = 1;
+  this.enemyNumber = 20;
+  this.enemies = [];
 }
+
+Level.prototype.generateEnemies = function(num) {
+  num = num || this.enemyNumber; 
+  for (var enemy, i = 0; i < num; i++) {
+    enemy = new Enemy();
+    this.enemies.push(enemy);
+  }
+
+  return this.enemies;   
+}
+Level.prototype.checkEnemies = function() {
+  var activeEnemies = [];
+  for (var enemy, i = 0; i < this.enemies.length; i++) {
+    enemy = this.enemies[i];
+    if (enemy.x >= -200 && enemy.x <= 1109) {
+      activeEnemies.push(enemy);
+    }
+  }
+
+  this.enemies = activeEnemies;
+  return this.enemies;
+}
+Level.prototype.addMissingEnemies = function() {
+  var numberMissing = this.enemyNumber - this.enemies.length;
+  if (numberMissing > 0) {
+    this.generateEnemies(numberMissing);
+  }
+
+  return this.enemies;
+}
+Level.prototype.update = function(dt) {
+  level.checkEnemies();
+  level.addMissingEnemies();
+} 
+
+var level = new Level();
+level.generateEnemies();
+
 
 var player = new Player();
 
