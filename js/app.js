@@ -118,12 +118,26 @@ HealthPoints.prototype.update = function(dt) {
 // Place the player object in a variable called player
 
 var Level = function() {
-  this.length = 30000;
+  this.duration = 10;
   this.difficulty = 1;
-  this.enemyNumber = 20;
+  this.enemyNumber = 10;
   this.enemies = [];
+  this.timePlayed = 0;
 }
 
+Level.prototype.checkDuration = function(dt) {
+  if ((this.timePlayed >= this.duration) && (this.difficulty < 3)) {
+    this.increaseDifficulty();  
+  } else {
+    this.timePlayed += dt;
+  }
+}
+Level.prototype.increaseDifficulty = function() {
+  this.timePlayed = 0;
+  this.duration += 5;
+  this.difficulty += 1;
+  this.enemyNumber += 5;  
+}
 Level.prototype.generateEnemies = function(num) {
   num = num || this.enemyNumber; 
   for (var enemy, i = 0; i < num; i++) {
@@ -154,6 +168,7 @@ Level.prototype.addMissingEnemies = function() {
   return this.enemies;
 }
 Level.prototype.update = function(dt) {
+  level.checkDuration(dt);
   level.checkEnemies();
   level.addMissingEnemies();
 } 
