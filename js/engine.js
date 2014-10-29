@@ -78,6 +78,7 @@ var Engine = (function(global) {
     });
     player.render();
     player.hp.render();
+    obstacle.render();
   }
 
   function reset() {
@@ -93,7 +94,8 @@ var Engine = (function(global) {
     'images/char-cat-girl.png',
     'images/char-horn-girl.png',
     'images/char-pink-girl.png',
-    'images/small-heart.png'
+    'images/small-heart.png',
+    'images/Rock.png'
   ]);
   Resources.onReady(init);
 

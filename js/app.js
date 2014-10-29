@@ -53,7 +53,6 @@ Player.prototype.setPlayerY = function() {
   return y;
 }
 Player.prototype.update = function(dt) {
-  //console.log(typeof dt);
   this.hp.update(dt);
 }
 Player.prototype.resetPosition = function() {
@@ -112,6 +111,26 @@ HealthPoints.prototype.update = function(dt) {
     this.value -= this.damageOverTime;
     this.afterLastTick = 0;
   }
+}
+
+var Obstacle = function() {
+  this.x = this.setObstacleX();
+  this.y = this.setObstacleY();
+  this.timeToLive = 5000;
+  this.sprite = 'images/Rock.png';
+}
+
+Obstacle.prototype.ordinateValues = [60, 143, 227, 310];
+Obstacle.prototype.setObstacleX = function() {
+  var x = Math.floor(Math.random() * 7) + 1;
+  return x * 101;
+}
+Obstacle.prototype.setObstacleY = function() {
+  var y = this.ordinateValues[Math.floor(Math.random() * 4)];
+  return y;
+}
+Obstacle.prototype.render = function() {
+  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
 
 var Level = function() {
@@ -174,7 +193,7 @@ var level = new Level();
 level.generateEnemies();
 
 var player = new Player();
-
+var obstacle = new Obstacle();
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 window.addEventListener('keydown', function(e) {
