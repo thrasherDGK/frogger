@@ -37,7 +37,6 @@ Enemy.prototype.update = function(dt) {
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
-
 var Player = function() {
   this.x = this.setPlayerX();
   this.y = this.setPlayerY();
@@ -53,7 +52,10 @@ Player.prototype.setPlayerY = function() {
   var y = 393;
   return y;
 }
-Player.prototype.update = function(dt) {}
+Player.prototype.update = function(dt) {
+  //console.log(typeof dt);
+  this.hp.update(dt);
+}
 Player.prototype.resetPosition = function() {
   this.x = this.setPlayerX();
   this.y = this.setPlayerY();  
@@ -85,6 +87,9 @@ Player.prototype.die = function() {
 var HealthPoints = function() {
   this.value = 5;
   this.sprite = 'images/small-heart.png';
+  this.damageOverTime = 1;
+  this.timeToTick = 5000;
+  this.afterLastTick = 0;
 }
 HealthPoints.prototype.loose = function(num) {
   this.value -= num;
@@ -101,7 +106,13 @@ HealthPoints.prototype.render = function() {
     x += 30;
   }
 }
-HealthPoints.prototype.update = function() {}
+HealthPoints.prototype.update = function(dt) {
+  this.afterLastTick += Math.floor(dt * 1000);
+  if (this.afterLastTick >= this.timeToTick) {
+    this.value -= this.damageOverTime;
+    this.afterLastTick -= this.timeToTick;
+  }
+}
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
@@ -116,7 +127,7 @@ var player = new Player();
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
-window.addEventListener("keydown", function(e) {
+window.addEventListener('keydown', function(e) {
     if([32, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
         e.preventDefault();
     }

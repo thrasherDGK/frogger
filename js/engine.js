@@ -36,8 +36,8 @@ var Engine = (function(global) {
     allEnemies.forEach(function(enemy) {
       enemy.update(dt);
     });
-    player.update();
-    player.hp.update();
+    player.update(dt);
+    //player.hp.update(dt);
   }
 
   function checkCollisions() {
