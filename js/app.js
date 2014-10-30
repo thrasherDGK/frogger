@@ -88,7 +88,7 @@ var HealthPoints = function() {
   this.value = 5;
   this.sprite = 'images/small-heart.png';
   this.damageOverTime = 1;
-  this.timeToTick = 5000;
+  this.timeToTick = 10;
   this.afterLastTick = 0;
 }
 HealthPoints.prototype.loose = function(num) {
@@ -107,15 +107,12 @@ HealthPoints.prototype.render = function() {
   }
 }
 HealthPoints.prototype.update = function(dt) {
-  this.afterLastTick += Math.floor(dt * 1000);
+  this.afterLastTick += dt;
   if (this.afterLastTick >= this.timeToTick) {
     this.value -= this.damageOverTime;
-    this.afterLastTick -= this.timeToTick;
+    this.afterLastTick = 0;
   }
 }
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
 
 var Level = function() {
   this.duration = 10;
@@ -175,7 +172,6 @@ Level.prototype.update = function(dt) {
 
 var level = new Level();
 level.generateEnemies();
-
 
 var player = new Player();
 

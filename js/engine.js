@@ -38,7 +38,6 @@ var Engine = (function(global) {
       enemy.update(dt);
     });
     player.update(dt);
-    //player.hp.update(dt);
   }
 
   function checkCollisions() {
