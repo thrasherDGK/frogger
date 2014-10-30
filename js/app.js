@@ -96,14 +96,15 @@ HealthPoints.prototype.loose = function(num) {
 HealthPoints.prototype.gain = function(num) {
   this.value += num;
 }
+HealthPoints.prototype.mesureBar = function() {
+  var l = Math.round(190 * this.value / 5.0);
+  return l;
+}
 HealthPoints.prototype.render = function() {
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, 200, 40);
-  for (var x = 0, i = 0; i < this.value; i++)
-  {
-    ctx.drawImage(Resources.get(this.sprite), x, 0);
-    x += 30;
-  }
+  ctx.fillStyle = '#2f6bf8';
+  ctx.fillRect(5, 5, 200, 40);
+  ctx.fillStyle = '#132d65';
+  ctx.fillRect(10, 10, this.mesureBar(), 30);
 }
 HealthPoints.prototype.update = function(dt) {
   this.afterLastTick += dt;
