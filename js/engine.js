@@ -37,6 +37,9 @@ var Engine = (function(global) {
     level.enemies.forEach(function(enemy) {
       enemy.update(dt);
     });
+    level.obstacles.forEach(function(obstacle) {
+      obstacle.update(dt);
+    });
     player.update(dt);
   }
 
@@ -73,12 +76,14 @@ var Engine = (function(global) {
   }
 
   function renderEntities() {
+    level.obstacles.forEach(function(obstacle) {
+      obstacle.render();
+    });
     level.enemies.forEach(function(enemy) {
       enemy.render();
     });
     player.render();
     player.hp.render();
-    obstacle.render();
   }
 
   function reset() {

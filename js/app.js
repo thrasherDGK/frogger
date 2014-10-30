@@ -116,14 +116,14 @@ HealthPoints.prototype.update = function(dt) {
 var Obstacle = function() {
   this.x = this.setObstacleX();
   this.y = this.setObstacleY();
-  this.timeToLive = 5000;
+  this.timeToLive = 5;
   this.sprite = 'images/Rock.png';
 }
 
 Obstacle.prototype.ordinateValues = [60, 143, 227, 310];
 Obstacle.prototype.setObstacleX = function() {
-  var x = Math.floor(Math.random() * 7) + 1;
-  return x * 101;
+  var x = (Math.floor(Math.random() * 7) + 1) * 101;
+  return x;
 }
 Obstacle.prototype.setObstacleY = function() {
   var y = this.ordinateValues[Math.floor(Math.random() * 4)];
@@ -132,12 +132,17 @@ Obstacle.prototype.setObstacleY = function() {
 Obstacle.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
+Obstacle.prototype.update = function(dt) {
+  this.timeToLive -= dt;
+}
 
 var Level = function() {
   this.duration = 10;
   this.difficulty = 1;
   this.enemyNumber = 10;
   this.enemies = [];
+  this.obstacleNumber = 0;
+  this.obstacles = [];
   this.timePlayed = 0;
 }
 
@@ -152,7 +157,8 @@ Level.prototype.increaseDifficulty = function() {
   this.timePlayed = 0;
   this.duration += 5;
   this.difficulty += 1;
-  this.enemyNumber += 5;  
+  this.enemyNumber += 5;
+  this.obstacleNumber += 1;  
 }
 Level.prototype.generateEnemies = function(num) {
   num = num || this.enemyNumber; 
@@ -183,17 +189,49 @@ Level.prototype.addMissingEnemies = function() {
 
   return this.enemies;
 }
+Level.prototype.generateObstacles = function(num) {
+  num = num || this.obstacleNumber;
+  for (var obstacle, i = 0; i < num; i++) {
+    obstacle = new Obstacle();
+    this.obstacles.push(obstacle);
+  }
+
+  return this.obstacles;
+}
+Level.prototype.checkObstacles = function() {
+  var activeObstacles = [];
+  for (var obstacle, i = 0; i < this.obstacles.length; i++) {
+    obstacle = this.obstacles[i];
+    if (obstacle.timeToLive > 0) {
+      activeObstacles.push(obstacle);
+    }
+  }
+
+  this.obstacles = activeObstacles;
+  return this.obstacles;
+}
+Level.prototype.addMissingObstacles = function() {
+  var numberMissing = this.obstacleNumber - this.obstacles.length;
+  if (numberMissing > 0) {
+    this.generateObstacles(numberMissing);
+  }
+
+  return this.obstacles;
+}
 Level.prototype.update = function(dt) {
   level.checkDuration(dt);
   level.checkEnemies();
   level.addMissingEnemies();
+  level.checkObstacles();
+  level.addMissingObstacles();
 } 
 
 var level = new Level();
 level.generateEnemies();
+level.generateObstacles();
 
 var player = new Player();
-var obstacle = new Obstacle();
+//var obstacle = new Obstacle();
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
 window.addEventListener('keydown', function(e) {
