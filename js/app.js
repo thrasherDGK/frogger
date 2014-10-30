@@ -62,20 +62,55 @@ Player.prototype.resetPosition = function() {
 Player.prototype.render = function() {
   ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
+Player.prototype.moveOptions = function() {
+  var moveOptions = [true, true, true, true],
+      obstacles = level.obstacles;
+  if (this.y <= 61) {
+    moveOptions[0] = false;
+  }
+  if (this.x <= 0) {
+    moveOptions[1] = false;
+  }
+  if (this.y >= 476) {
+    moveOptions[2] = false;
+  }
+  if (this.x >= 808) {
+    moveOptions[3] = false;
+  }
+
+  for (var obstacle, i = 0; i < obstacles.length; i++) {
+    obstacle = obstacles[i];
+    if (Math.abs(this.y - Math.round(obstacle.y + 83.3)) <= 2 && Math.abs(this.x - obstacle.x) <= 2) {
+      moveOptions[0] = false;
+    }
+    if (this.x == obstacle.x + 101 && Math.abs(this.y - obstacle.y) <= 2) {
+      moveOptions[1] = false;
+    }
+    if (Math.abs(this.y - Math.round(obstacle.y - 83.3)) <= 2 && Math.abs(this.x - obstacle.x) <= 2) {
+      moveOptions[2] = false;
+    }
+    if (this.x == obstacle.x - 101 && Math.abs(this.y - obstacle.y) <= 2) {
+      moveOptions[3] = false;
+    }
+  }
+
+  return moveOptions;
+}
 Player.prototype.handleInput = function(move) {
+  var moveOptions = this.moveOptions();
   switch(move) {
-    case 'left':
-      this.x = this.x <= 0 ? this.x : this.x - 101;
-      break;
-    case 'right':
-      this.x = this.x >= 808 ? this.x : this.x + 101;
-      break;
     case 'up':
-      this.y = this.y <= 61 ? this.y : Math.round(this.y - 83.3);
+      this.y = moveOptions[0] ? Math.round(this.y - 83.3) : this.y;
+      break;
+    case 'left':
+      this.x = moveOptions[1] ? this.x - 101 : this.x;
       break;
     case 'down':
-      this.y = this.y >= 476 ? this.y : Math.round(this.y + 83.3);
+      this.y = moveOptions[2] ? Math.round(this.y + 83.3) : this.y;
       break;
+    case 'right':
+      this.x = moveOptions[3] ? this.x + 101 : this.x;
+      break;   
   }
 }
 Player.prototype.die = function() {
@@ -117,7 +152,7 @@ HealthPoints.prototype.update = function(dt) {
 var Obstacle = function() {
   this.x = this.setObstacleX();
   this.y = this.setObstacleY();
-  this.timeToLive = 5;
+  this.timeToLive = 30;
   this.sprite = 'images/Rock.png';
 }
 
@@ -140,7 +175,7 @@ Obstacle.prototype.update = function(dt) {
 var Level = function() {
   this.duration = 10;
   this.difficulty = 1;
-  this.enemyNumber = 10;
+  this.enemyNumber = 8;
   this.enemies = [];
   this.obstacleNumber = 0;
   this.obstacles = [];
@@ -158,7 +193,7 @@ Level.prototype.increaseDifficulty = function() {
   this.timePlayed = 0;
   this.duration += 5;
   this.difficulty += 1;
-  this.enemyNumber += 5;
+  this.enemyNumber += 3;
   this.obstacleNumber += 1;  
 }
 Level.prototype.generateEnemies = function(num) {
