@@ -225,10 +225,18 @@ Level.prototype.addMissingEnemies = function() {
 
   return this.enemies;
 }
+Level.prototype.allowedObstacle = function() {
+  obstacle = new Obstacle();
+  if (Math.abs(player.x - obstacle.x) <= 2 && Math.abs(player.y - obstacle.y) <= 2) {
+    this.allowedObstacle();
+  } else {
+    return obstacle;
+  }
+}
 Level.prototype.generateObstacles = function(num) {
   num = num || this.obstacleNumber;
   for (var obstacle, i = 0; i < num; i++) {
-    obstacle = new Obstacle();
+    obstacle = this.allowedObstacle();
     this.obstacles.push(obstacle);
   }
 
