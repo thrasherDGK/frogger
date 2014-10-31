@@ -12,7 +12,7 @@ var Engine = (function(global) {
 
   function main() {
     var now = Date.now(),
-      dt = (now - lastTime) / 1000.0;
+         dt = (now - lastTime) / 1000.0;
 
     update(dt);
     render();
@@ -100,7 +100,8 @@ var Engine = (function(global) {
     'images/char-horn-girl.png',
     'images/char-pink-girl.png',
     'images/small-heart.png',
-    'images/Rock.png'
+    'images/Rock.png',
+    'images/Heart.png'
   ]);
   Resources.onReady(init);
 

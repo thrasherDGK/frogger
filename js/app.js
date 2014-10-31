@@ -1,3 +1,103 @@
+var X_LEFT = 0,
+    X_RIGHT = 909,
+    Y_TOP = 0,
+    Y_BOTTOM = 581,
+    ROWS = 7,
+    COLS = 9,
+    CELL_HEIGHT = 83,
+    CELL_WIDTH  = 101;
+
+var Map = function() {
+  this.background;
+  this.items = [];
+  this.matrix = this.createMap();
+}
+
+Map.prototype.createMap = function() {
+  var x, y,
+      row = [], 
+      matrix = [];
+
+  for (var i = 0; i < COLS; i++) {
+    for (var j = 0; j < ROWS; j++) {
+      x = i * CELL_WIDTH;
+      y = j * CELL_HEIGHT;
+      row.push({'x': x, 'y': y});
+    }
+    matrix.push(row);
+    row = [];
+  }
+
+  return matrix;
+}
+Map.prototype.render = function()  {
+  ctx.drawImage(Resources.get(this.background), 0, 0);
+}
+
+var map = new Map();
+
+var Item = function() {
+  this.x = this.setX();
+  this.y = this.setY();
+  this.sprite = 'images/Star.png';
+  this.destroyed = false;
+}
+
+Item.prototype.setX = function() {
+  var i = Math.floor(Math.random() * COLS);
+  return map.matrix[i][0].x;
+}
+Item.prototype.setY = function() {
+  var j = Math.floor(Math.random() * ROWS);
+  return map.matrix[0][j].y;
+}
+Item.prototype.dissapear = function() {
+  var item = this,
+  destroyTimeout = item.timeToLive * 1000,
+  fadingTimeout = destroyTimeout - 3000;
+  setTimeout(function() {
+    item.fading = true;
+  }, fadingTimeout);
+  setTimeout(function() {
+    item.destroyed = true;
+  }, destroyTimeout);
+}
+Item.prototype.render = function() {
+  if (this.fading) {
+    ctx.globalAlpha = 0.5;
+  }
+  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+  ctx.globalAlpha = 1;
+}
+
+var MedKit = function() {
+  Item.call(this);
+  this.sprite = 'images/Heart.png';
+  this.timeToLive = 10;
+}
+
+MedKit.prototype = Object.create(Item.prototype);
+MedKit.prototype.constructor = MedKit;
+
+var Grave = function() {
+  Item.call(this);
+  this.sprite = 'images/Rock.png';
+  this.timeToLive = 5;
+}
+
+Grave.prototype = Object.create(Item.prototype);
+Grave.prototype.constructor = Grave;
+
+var Key = function() {
+  Item.call(this);
+  this.sprite = 'images/Key.png';
+}
+
+Key.prototype = Object.create(Item.prototype);
+Key.prototype.constructor = Key;
+
+
+
 var Enemy = function() {
   this.direction = this.setDirection();
   this.speed = this.setSpeed();
