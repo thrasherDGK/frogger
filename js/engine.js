@@ -29,17 +29,17 @@ var Engine = (function(global) {
 
   function update(dt) {
     updateEntities(dt);
-    checkCollisions();
+    //checkCollisions();
   }
 
   function updateEntities(dt) {
-    level.update(dt);
-    level.enemies.forEach(function(enemy) {
-      enemy.update(dt);
-    });
-    level.obstacles.forEach(function(obstacle) {
-      obstacle.update(dt);
-    });
+    //level.update(dt);
+    //level.enemies.forEach(function(enemy) {
+    //  enemy.update(dt);
+    //});
+    //level.obstacles.forEach(function(obstacle) {
+    //  obstacle.update(dt);
+    //});
     player.update(dt);
   }
 
@@ -53,37 +53,40 @@ var Engine = (function(global) {
   }
 
   function render() {
-    var rowImages = [
-        'images/water-block.png',
-        'images/stone-block.png',
-        'images/stone-block.png',
-        'images/stone-block.png',
-        'images/stone-block.png',
-        'images/grass-block.png',
-        'images/grass-block.png'
-      ],
-      numRows = 7,
-      numCols = 9,
-      row, col;
-
-    for (row = 0; row < numRows; row++) {
-      for (col = 0; col < numCols; col++) {
-        ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
-      }
-    }
-
+    //var rowImages = [
+    //    'images/water-block.png',
+    //    'images/stone-block.png',
+    //    'images/stone-block.png',
+    //    'images/stone-block.png',
+    //    'images/stone-block.png',
+    //    'images/grass-block.png',
+    //    'images/grass-block.png'
+    //  ],
+    //  numRows = 7,
+    //  numCols = 9,
+    //  row, col;
+    //
+    //for (row = 0; row < numRows; row++) {
+    //  for (col = 0; col < numCols; col++) {
+    //    ctx.drawImage(Resources.get(rowImages[row]), col * 101, row * 83);
+    //  }
+    //}
+    map.render();
     renderEntities();
   }
 
   function renderEntities() {
-    level.obstacles.forEach(function(obstacle) {
-      obstacle.render();
-    });
-    level.enemies.forEach(function(enemy) {
-      enemy.render();
-    });
+    key.render();
+    medkit.render();
+    grave.render();
+    //level.obstacles.forEach(function(obstacle) {
+    //  obstacle.render();
+    //});
+    //level.enemies.forEach(function(enemy) {
+    //  enemy.render();
+    //});
     player.render();
-    player.hp.render();
+    //player.hp.render();
   }
 
   function reset() {
@@ -101,7 +104,8 @@ var Engine = (function(global) {
     'images/char-pink-girl.png',
     'images/small-heart.png',
     'images/Rock.png',
-    'images/Heart.png'
+    'images/Heart.png',
+    'images/Key.png'
   ]);
   Resources.onReady(init);
 

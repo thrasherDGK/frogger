@@ -1,3 +1,4 @@
+// SET OF CONSTANTS
 var X_LEFT = 0,
     X_RIGHT = 909,
     Y_TOP = 0,
@@ -7,22 +8,23 @@ var X_LEFT = 0,
     CELL_HEIGHT = 83,
     CELL_WIDTH  = 101;
 
+// MAP DEFINITION
 var Map = function() {
   this.background;
-  this.items = [];
+  this.tiles = [];
   this.matrix = this.createMap();
 }
 
 Map.prototype.createMap = function() {
-  var x, y,
+  var tile,
       row = [], 
       matrix = [];
 
   for (var i = 0; i < COLS; i++) {
     for (var j = 0; j < ROWS; j++) {
-      x = i * CELL_WIDTH;
-      y = j * CELL_HEIGHT;
-      row.push({'x': x, 'y': y});
+      tile = new Tile(i, j);
+      this.tiles.push(tile);
+      row.push({'x': i, 'y': j, 'status': 'empty'});
     }
     matrix.push(row);
     row = [];
@@ -31,16 +33,32 @@ Map.prototype.createMap = function() {
   return matrix;
 }
 Map.prototype.render = function()  {
-  ctx.drawImage(Resources.get(this.background), 0, 0);
+  //ctx.drawImage(Resources.get(this.background), 0, 0);
+  this.tiles.forEach(function(tile) {
+    tile.render();
+  });
+}
+var Tile = function(x, y) {
+  this.x = x;
+  this.y = y;
+  this.sprite = 'images/stone-block.png';
 }
 
+Tile.prototype.render = function() {
+  var x = this.x * CELL_WIDTH,
+      y = this.y * CELL_HEIGHT + 20;
+  ctx.drawImage(Resources.get(this.sprite), x, y);
+}
 var map = new Map();
 
+// CREATING STATIC MAP ITEMS
 var Item = function() {
   this.x = this.setX();
   this.y = this.setY();
+  this.checkPosition();
   this.sprite = 'images/Star.png';
   this.destroyed = false;
+  this.setTileStatus('taken');
 }
 
 Item.prototype.setX = function() {
@@ -51,6 +69,23 @@ Item.prototype.setY = function() {
   var j = Math.floor(Math.random() * ROWS);
   return map.matrix[0][j].y;
 }
+Item.prototype.setTileStatus = function(status) {
+  var i = this.x,
+      j = this.y;
+  map.matrix[i][j].status = status;
+  return status;
+}
+Item.prototype.checkPosition = function(){
+  var i = this.x,
+      j = this.y;
+  if (map.matrix[this.x][this.y].status != 'empty') {
+    this.x = this.setX();
+    this.y = this.setY();
+    this.checkPosition();
+  }
+
+  return true;
+}
 Item.prototype.dissapear = function() {
   var item = this,
   destroyTimeout = item.timeToLive * 1000,
@@ -60,20 +95,25 @@ Item.prototype.dissapear = function() {
   }, fadingTimeout);
   setTimeout(function() {
     item.destroyed = true;
+    map.matrix[item.x][item.y].status = 'empty';
   }, destroyTimeout);
 }
 Item.prototype.render = function() {
+  var x = this.x * CELL_WIDTH,
+      y = this.y * CELL_HEIGHT; 
   if (this.fading) {
     ctx.globalAlpha = 0.5;
   }
-  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+  ctx.drawImage(Resources.get(this.sprite), x, y);
   ctx.globalAlpha = 1;
 }
 
 var MedKit = function() {
   Item.call(this);
   this.sprite = 'images/Heart.png';
-  this.timeToLive = 10;
+  this.timeToLive = 15;
+  this.setTileStatus('collectable');
+  //this.dissapear();
 }
 
 MedKit.prototype = Object.create(Item.prototype);
@@ -82,7 +122,9 @@ MedKit.prototype.constructor = MedKit;
 var Grave = function() {
   Item.call(this);
   this.sprite = 'images/Rock.png';
-  this.timeToLive = 5;
+  this.timeToLive = 15;
+  this.setTileStatus('obstacle');
+  //this.dissapear();
 }
 
 Grave.prototype = Object.create(Item.prototype);
@@ -91,13 +133,143 @@ Grave.prototype.constructor = Grave;
 var Key = function() {
   Item.call(this);
   this.sprite = 'images/Key.png';
+  this.setTileStatus('collectable');
 }
 
 Key.prototype = Object.create(Item.prototype);
 Key.prototype.constructor = Key;
 
+var medkit = new MedKit();
+var key = new Key();
+var grave = new Grave();
 
+// CREATING PLAYER
+var Player = function() {
+  this.x = this.setPlayerX();
+  this.y = this.setPlayerY();
+  this.sprite = 'images/char-boy.png';
+  //this.hp = new HealthPoints();
+  this.setTileStatus('player');
+}
 
+Player.prototype.setPlayerX = function() {
+  var x = Math.floor(Math.random() * 5) + 2;
+  return x;
+}
+Player.prototype.setPlayerY = function() {
+  var y = Math.floor(Math.random() * 2) + 5;
+  return y;
+}
+Player.prototype.setTileStatus = function(status) {
+  var i = this.x,
+      j = this.y;
+  map.matrix[i][j].status = status;
+  return status;
+}
+Player.prototype.update = function(dt) {
+  //this.hp.update(dt);
+}
+Player.prototype.resetPosition = function() {
+  this.x = this.setPlayerX();
+  this.y = this.setPlayerY();  
+}
+Player.prototype.render = function() {
+  var x = this.x * CELL_WIDTH,
+      y = this.y * CELL_HEIGHT;
+  ctx.drawImage(Resources.get(this.sprite), x, y);
+}
+Player.prototype.moveOptions = function() {
+  var moveOptions = [true, true, true, true],
+      items = level.items;
+  if (this.y <= 0) {
+    moveOptions[0] = false;
+  }
+  if (this.x <= 0) {
+    moveOptions[1] = false;
+  }
+  if (this.y >= ROWS - 1) {
+    moveOptions[2] = false;
+  }
+  if (this.x >= COLS - 1) {
+    moveOptions[3] = false;
+  }
+
+  for (var item, i = 0; i < items.length; i++) {
+    item = items[i];
+    if (item instanceof Grave) {
+      if (this.y == item.y + 1 && this.x == item.x) {
+        moveOptions[0] = false;
+      }
+      if (this.x == item.x + 1 && this.y == item.y) {
+        moveOptions[1] = false;
+      }
+      if (this.y == item.y - 1 && this.x == item.x) {
+        moveOptions[2] = false;
+      }
+      if (this.x == item.x - 1 && this.y == item.y) {
+        moveOptions[3] = false;
+      }
+    }
+  }
+
+  return moveOptions;
+}
+Player.prototype.handleInput = function(move) {
+  var moveOptions = this.moveOptions();
+  this.setTileStatus('empty');
+  switch(move) {
+    case 'up':
+      this.y = moveOptions[0] ? this.y - 1 : this.y;
+      break;
+    case 'left':
+      this.x = moveOptions[1] ? this.x - 1 : this.x;
+      break;
+    case 'down':
+      this.y = moveOptions[2] ? this.y + 1 : this.y;
+      break;
+    case 'right':
+      this.x = moveOptions[3] ? this.x + 1 : this.x;
+      break;   
+  }
+  this.setTileStatus('player');
+}
+Player.prototype.die = function() {
+  this.hp.loose(1);
+  this.resetPosition();  
+}
+
+var HealthPoints = function() {
+  this.value = 5;
+  this.sprite = 'images/small-heart.png';
+  this.damageOverTime = 1;
+  this.timeToTick = 10;
+  this.afterLastTick = 0;
+}
+HealthPoints.prototype.loose = function(num) {
+  this.value -= num;
+}
+HealthPoints.prototype.gain = function(num) {
+  this.value += num;
+}
+HealthPoints.prototype.mesureBar = function() {
+  var l = Math.round(190 * this.value / 5.0);
+  return l;
+}
+HealthPoints.prototype.render = function() {
+  ctx.fillStyle = '#2f6bf8';
+  ctx.fillRect(5, 5, 200, 40);
+  ctx.fillStyle = '#132d65';
+  ctx.fillRect(10, 10, this.mesureBar(), 30);
+}
+HealthPoints.prototype.update = function(dt) {
+  this.afterLastTick += dt;
+  if (this.afterLastTick >= this.timeToTick) {
+    this.value -= this.damageOverTime;
+    this.afterLastTick = 0;
+  }
+}
+
+// ENEMY
 var Enemy = function() {
   this.direction = this.setDirection();
   this.speed = this.setSpeed();
@@ -137,117 +309,6 @@ Enemy.prototype.update = function(dt) {
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 }
-var Player = function() {
-  this.x = this.setPlayerX();
-  this.y = this.setPlayerY();
-  this.sprite = 'images/char-boy.png';
-  this.hp = new HealthPoints();
-}
-
-Player.prototype.setPlayerX = function() {
-  var x = 404;
-  return x;
-}
-Player.prototype.setPlayerY = function() {
-  var y = 393;
-  return y;
-}
-Player.prototype.update = function(dt) {
-  this.hp.update(dt);
-}
-Player.prototype.resetPosition = function() {
-  this.x = this.setPlayerX();
-  this.y = this.setPlayerY();  
-}
-Player.prototype.render = function() {
-  ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
-Player.prototype.moveOptions = function() {
-  var moveOptions = [true, true, true, true],
-      obstacles = level.obstacles;
-  if (this.y <= 61) {
-    moveOptions[0] = false;
-  }
-  if (this.x <= 0) {
-    moveOptions[1] = false;
-  }
-  if (this.y >= 476) {
-    moveOptions[2] = false;
-  }
-  if (this.x >= 808) {
-    moveOptions[3] = false;
-  }
-
-  for (var obstacle, i = 0; i < obstacles.length; i++) {
-    obstacle = obstacles[i];
-    if (Math.abs(this.y - Math.round(obstacle.y + 83.3)) <= 2 && Math.abs(this.x - obstacle.x) <= 2) {
-      moveOptions[0] = false;
-    }
-    if (this.x == obstacle.x + 101 && Math.abs(this.y - obstacle.y) <= 2) {
-      moveOptions[1] = false;
-    }
-    if (Math.abs(this.y - Math.round(obstacle.y - 83.3)) <= 2 && Math.abs(this.x - obstacle.x) <= 2) {
-      moveOptions[2] = false;
-    }
-    if (this.x == obstacle.x - 101 && Math.abs(this.y - obstacle.y) <= 2) {
-      moveOptions[3] = false;
-    }
-  }
-
-  return moveOptions;
-}
-Player.prototype.handleInput = function(move) {
-  var moveOptions = this.moveOptions();
-  switch(move) {
-    case 'up':
-      this.y = moveOptions[0] ? Math.round(this.y - 83.3) : this.y;
-      break;
-    case 'left':
-      this.x = moveOptions[1] ? this.x - 101 : this.x;
-      break;
-    case 'down':
-      this.y = moveOptions[2] ? Math.round(this.y + 83.3) : this.y;
-      break;
-    case 'right':
-      this.x = moveOptions[3] ? this.x + 101 : this.x;
-      break;   
-  }
-}
-Player.prototype.die = function() {
-  this.hp.loose(1);
-  this.resetPosition();  
-}
-
-var HealthPoints = function() {
-  this.value = 5;
-  this.sprite = 'images/small-heart.png';
-  this.damageOverTime = 1;
-  this.timeToTick = 10;
-  this.afterLastTick = 0;
-}
-HealthPoints.prototype.loose = function(num) {
-  this.value -= num;
-}
-HealthPoints.prototype.gain = function(num) {
-  this.value += num;
-}
-HealthPoints.prototype.mesureBar = function() {
-  var l = Math.round(190 * this.value / 5.0);
-  return l;
-}
-HealthPoints.prototype.render = function() {
-  ctx.fillStyle = '#2f6bf8';
-  ctx.fillRect(5, 5, 200, 40);
-  ctx.fillStyle = '#132d65';
-  ctx.fillRect(10, 10, this.mesureBar(), 30);
-}
-HealthPoints.prototype.update = function(dt) {
-  this.afterLastTick += dt;
-  if (this.afterLastTick >= this.timeToTick) {
-    this.value -= this.damageOverTime;
-    this.afterLastTick = 0;
-  }
-}
 
 var Obstacle = function() {
   this.x = this.setObstacleX();
@@ -276,6 +337,7 @@ var Level = function() {
   this.duration = 10;
   this.difficulty = 1;
   this.enemyNumber = 8;
+  this.items = [];
   this.enemies = [];
   this.obstacleNumber = 0;
   this.obstacles = [];
@@ -373,6 +435,9 @@ Level.prototype.update = function(dt) {
 var level = new Level();
 level.generateEnemies();
 level.generateObstacles();
+level.items.push(key);
+level.items.push(medkit);
+level.items.push(grave);
 
 var player = new Player();
 //var obstacle = new Obstacle();
